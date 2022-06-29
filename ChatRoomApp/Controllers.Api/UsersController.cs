@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatRoomApp.Controllers.Api
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/Users")]
     [ApiController]
     public class UsersController : Controller

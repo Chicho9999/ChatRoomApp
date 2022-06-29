@@ -21,9 +21,8 @@ namespace ChatRoomApp.Controllers.Api
         public async Task<IActionResult> Login([FromBody] UserForAuthenticationDto userForAuthentication)
         {
             var user = await _userManager.FindByEmailAsync(userForAuthentication.Email);
-            var passwordHasher = new PasswordHasher<IdentityUser>();
-            var passHasher = passwordHasher.HashPassword(user, userForAuthentication.Password);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, passHasher))
+            var passHasher2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, userForAuthentication.Password);
+            if (user == null || ((int)passHasher2 != 1))
                 return Unauthorized(new AuthResponseDto { ErrorMessage = "Invalid Authentication" });
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);
