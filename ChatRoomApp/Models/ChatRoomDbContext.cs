@@ -11,43 +11,39 @@ namespace ChatRoom.Data.Models
 
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var passwordHasher = new PasswordHasher<User>();
+            var identityPasswordHasher = new PasswordHasher<IdentityUser>();
 
-            //add Users
-            var lisandro = new User()
+            var userTest = new IdentityUser()
             {
-                Id = 1,
-                FirstName = "Lisandro",
-                LastName = "Chichi",
-                Username = "LisandroAdmin",
-                Email = "lisandrochichi@gmail.com",
-                CreatedBy = 1,
-                CreatedDate = DateTime.Now
+                Id = Guid.NewGuid().ToString(),
+                Email = "test@test.com",
+                UserName = "test",
+                NormalizedEmail = "test@test.com",
+                NormalizedUserName = "test"
+                
             };
 
-            var test = new User()
+            var userAdmin = new IdentityUser()
             {
-                Id = 2,
-                FirstName = "Test",
-                LastName = "Test",
-                Username = "TestAdmin",
-                Email = "test@gmail.com",
-                CreatedBy = 1,
-                CreatedDate = DateTime.Now
+                Id = Guid.NewGuid().ToString(),
+                Email = "admin@admin.com",
+                UserName = "admin",
+                NormalizedEmail = "admin@admin.com",
+                NormalizedUserName = "admin"
             };
 
             //add rooms
-            var roomGames = new Room { 
+            var roomGames = new Room
+            {
                 Id = 1,
                 Name = "Games",
-                CreatedDate= DateTime.Now,
-                CreatedBy= 1
+                CreatedDate = DateTime.Now,
+                CreatedBy = 1
             };
 
             var roomPolitics = new Room
@@ -66,17 +62,17 @@ namespace ChatRoom.Data.Models
                 CreatedBy = 1
             };
 
-            var hashedPassword = passwordHasher.HashPassword(lisandro, "admin123.");
-            var testPassword = passwordHasher.HashPassword(test, "test123.");
+            var identityTestPassword = identityPasswordHasher.HashPassword(userTest, "test123.");
+            var adminPassword = identityPasswordHasher.HashPassword(userAdmin, "admin123.");
 
-            lisandro.Password = hashedPassword;
-            test.Password = testPassword;
+            userTest.PasswordHash = identityTestPassword;
+            userAdmin.PasswordHash = adminPassword;
 
-            modelBuilder.Entity<User>().HasData(lisandro);
-            modelBuilder.Entity<User>().HasData(test);
             modelBuilder.Entity<Room>().HasData(roomGames);
             modelBuilder.Entity<Room>().HasData(roomPolitics);
             modelBuilder.Entity<Room>().HasData(roomReligion);
+            modelBuilder.Entity<IdentityUser>().HasData(userTest);
+            modelBuilder.Entity<IdentityUser>().HasData(userAdmin);
         }
     }
 }

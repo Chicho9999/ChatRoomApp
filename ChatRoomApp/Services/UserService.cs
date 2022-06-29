@@ -5,24 +5,18 @@ namespace ChatRoomApp.Services
 {
     public class UserService : IUserService
     {
-        public ChatRoomDbContext DbContext;
+        public ChatRoomDbContext _dbContext;
+        private readonly UserManager<IdentityUser> userManager;
 
-        public UserService(ChatRoomDbContext dbContext)
+        public UserService(ChatRoomDbContext dbContext, UserManager<IdentityUser> userManager)
         {
-            DbContext = dbContext;
+            _dbContext = dbContext;
+            this.userManager = userManager;
         }
 
-        public async Task<List<User>> GetAllUsers()
+        public async Task<List<IdentityUser>> GetAllUsers()
         {
-            return await DbContext.Users.ToListAsync();
-        }
-
-        public async Task<User?> Authenticate(string username, string password)
-        {
-            var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Username == username && x.Password == password);
-            if (user == null)
-                return null;
-            return user;
+            return await userManager.Users.ToListAsync();
         }
     }
 }

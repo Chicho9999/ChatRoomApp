@@ -2,7 +2,6 @@ using ChatRoom.Data.Models;
 using ChatRoomApp.Helper;
 using ChatRoomApp.Services;
 using ChatRoomApp.Services.Interface;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -10,7 +9,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ChatRoomDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ChatRoomDbContextConnection' not found.");
 
-var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var jwtSettings = builder.Configuration.GetSection("JWTSettings");
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -30,16 +29,17 @@ builder.Services.AddAuthentication(opt =>
     };
 });
 
-builder.Services.AddDbContext<ChatRoomDbContext>(options =>
-    options.UseSqlServer(connectionString)); ;
+builder.Services.AddDefaultIdentity<IdentityUser>()
+    .AddEntityFrameworkStores<ChatRoomDbContext>();
+
 builder.Services.AddScoped<JwtHandler>();
+//builder.Services.AddScoped<UserManager<User>>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDbContext<ChatRoomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 var app = builder.Build();
 
@@ -54,9 +54,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseAuthorization();
 app.UseAuthentication();
 app.UseRouting();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
