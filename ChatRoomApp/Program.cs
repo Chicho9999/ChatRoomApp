@@ -33,11 +33,25 @@ builder.Services.AddDefaultIdentity<IdentityUser>()
     .AddEntityFrameworkStores<ChatRoomDbContext>();
 
 builder.Services.AddScoped<JwtHandler>();
-//builder.Services.AddScoped<UserManager<User>>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                  policy =>
+                  {
+                      policy.WithOrigins("http://localhost:3000");
+                      policy.AllowAnyHeader();
+                      policy.AllowAnyMethod();
+                  });
+});
+
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddDbContext<ChatRoomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -50,6 +64,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

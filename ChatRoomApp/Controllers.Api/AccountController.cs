@@ -20,15 +20,18 @@ namespace ChatRoomApp.Controllers.Api
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UserForAuthenticationDto userForAuthentication)
         {
-            var user = await _userManager.FindByEmailAsync(userForAuthentication.Email);
-            var passHasher2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, userForAuthentication.Password);
-            if (user == null || ((int)passHasher2 != 1))
+            var user = await _userManager.FindByNameAsync(userForAuthentication.Username);
+            if (user == null)
                 return Unauthorized(new AuthResponseDto { ErrorMessage = "Invalid Authentication" });
+            var passHasher2 = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, userForAuthentication.Password);
+            if ((int)passHasher2 != 1)
+                return Unauthorized(new AuthResponseDto { ErrorMessage = "Invalid Authentication" });
+
             var signingCredentials = _jwtHandler.GetSigningCredentials();
             var claims = _jwtHandler.GetClaims(user);
             var tokenOptions = _jwtHandler.GenerateTokenOptions(signingCredentials, claims);
             var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-            return Ok(new AuthResponseDto { IsAuthSuccessful = true, Token = token });
+            return Ok(new AuthResponseDto { IsAuthSuccessful = true, Token = token, UserId = user.Id, UserName = user.UserName });
         }
     }
 }

@@ -11,12 +11,17 @@ namespace UniversityPlatformApi.Data.Models
 
         public int RoomId { get; set; }
 
+        public int UserId { get; set; }
+
         [MaxLength(250)]
         [Required]
         public string? Body { get; set; }
 
         [ForeignKey("RoomId")]
         public virtual Room? Room { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual User? User { get; set; }
 
     }
 }
